@@ -11,10 +11,12 @@ export default function SiteFooter() {
         <div>
           <div className="font-semibold">Main Links</div>
           <ul className="mt-2 space-y-1">
-            <li><a className="hover:underline" href="https://bizreply.co/">How It Works</a></li>
-            <li><a className="hover:underline" href="https://bizreply.featurebase.app/roadmap">Product Roadmap</a></li>
-            <li><a className="hover:underline" href="https://bizreply.co/">Affiliate Program</a></li>
-            <li><a className="hover:underline" href="https://bizreply.co/">Book A Call</a></li>
+            <li><a className="hover:underline" href="#how-it-works">How it works</a></li>
+            <li><a className="hover:underline" href="#features">Features</a></li>
+            <li><a className="hover:underline" href="#pricing">Pricing</a></li>
+            <li><a className="hover:underline" href="#faq">FAQ</a></li>
+            <li><a className="hover:underline" href="#about">About</a></li>
+            <li><a className="hover:underline" href="#contact">Contact</a></li>
           </ul>
         </div>
         <div>
@@ -26,8 +28,16 @@ export default function SiteFooter() {
           </ul>
         </div>
       </div>
-      <div className="text-center text-xs text-black/60 dark:text-white/60 mt-8">
-        © bizreply.co — All Rights Reserved
+      <div className="max-w-6xl mx-auto px-6 mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-black/60 dark:text-white/60">
+        <div>© bizreply.co — All Rights Reserved</div>
+        <div className="space-x-4">
+          <a className="hover:underline" href="/privacy">Privacy</a>
+          <a className="hover:underline" href="/terms">Terms</a>
+          <a className="hover:underline" href="/cookies">Cookies</a>
+          <a className="hover:underline" href="/security">Security</a>
+          <a className="hover:underline" href="/refund-policy">Refunds</a>
+        </div>
+        <div className="text-black/60 dark:text-white/60">Made with ❤️ by BizReply</div>
       </div>
     </footer>
   );

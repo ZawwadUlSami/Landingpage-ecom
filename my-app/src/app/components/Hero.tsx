@@ -16,7 +16,7 @@ export default function Hero() {
           href="https://bizreply.co/"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex h-12 items-center justify-center rounded-full bg-foreground text-background px-6 text-sm font-medium hover:opacity-90"
+          className="inline-flex h-12 items-center justify-center rounded-full bg-brand-gradient text-white px-6 text-sm font-medium hover:opacity-90"
         >
           Start For Free Today
         </a>

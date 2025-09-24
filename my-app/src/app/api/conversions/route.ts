@@ -5,6 +5,14 @@ let verifyIdToken: any, getUserByUid: any, getFirestore: any
 
 async function initializeFirebaseAdmin() {
   try {
+    console.log('Attempting to initialize Firebase Admin for conversions...')
+    
+    // Check if environment variables are available
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      console.error('Firebase environment variables not available')
+      return false
+    }
+    
     const firebaseAdmin = await import('@/lib/firebase-admin')
     const firebaseFirestore = await import('firebase-admin/firestore')
     
@@ -12,6 +20,7 @@ async function initializeFirebaseAdmin() {
     getUserByUid = firebaseAdmin.getUserByUid
     getFirestore = firebaseFirestore.getFirestore
     
+    console.log('Firebase Admin initialized successfully for conversions')
     return true
   } catch (error) {
     console.error('Failed to initialize Firebase Admin:', error)

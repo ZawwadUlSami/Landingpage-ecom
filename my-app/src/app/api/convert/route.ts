@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PDFProcessor } from '@/lib/pdfProcessor'
-import { writeFile, mkdir } from 'fs/promises'
+import { writeFile } from 'fs/promises'
 import { join } from 'path'
+import { tmpdir } from 'os'
 import { v4 as uuidv4 } from 'uuid'
 
 // Dynamic import to prevent build-time errors
@@ -9,6 +10,14 @@ let verifyIdToken: any, getUserByUid: any, updateUserCredits: any, getFirestore:
 
 async function initializeFirebaseAdmin() {
   try {
+    console.log('Attempting to initialize Firebase Admin...')
+    
+    // Check if environment variables are available
+    if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+      console.error('Firebase environment variables not available')
+      return false
+    }
+    
     const firebaseAdmin = await import('@/lib/firebase-admin')
     const firebaseFirestore = await import('firebase-admin/firestore')
     
@@ -17,6 +26,7 @@ async function initializeFirebaseAdmin() {
     updateUserCredits = firebaseAdmin.updateUserCredits
     getFirestore = firebaseFirestore.getFirestore
     
+    console.log('Firebase Admin initialized successfully')
     return true
   } catch (error) {
     console.error('Failed to initialize Firebase Admin:', error)
@@ -96,14 +106,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'uploads')
-    await mkdir(uploadsDir, { recursive: true })
+    // Use system temp directory (works in serverless environments)
+    const tempDir = tmpdir()
 
     // Save uploaded file
     const fileId = uuidv4()
-    const pdfPath = join(uploadsDir, `${fileId}.pdf`)
-    const excelPath = join(uploadsDir, `${fileId}.xlsx`)
+    const pdfPath = join(tempDir, `${fileId}.pdf`)
+    const excelPath = join(tempDir, `${fileId}.xlsx`)
 
     const buffer = Buffer.from(await file.arrayBuffer())
     await writeFile(pdfPath, buffer)

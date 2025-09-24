@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PDFProcessor } from '@/lib/pdfProcessor'
-import { writeFile, mkdir } from 'fs/promises'
+import { writeFile } from 'fs/promises'
 import { join } from 'path'
+import { tmpdir } from 'os'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: NextRequest) {
@@ -34,14 +35,13 @@ export async function POST(request: NextRequest) {
     }
     
     try {
-      // Create uploads directory if it doesn't exist
-      const uploadsDir = join(process.cwd(), 'uploads')
-      await mkdir(uploadsDir, { recursive: true })
+      // Use system temp directory (works in serverless environments)
+      const tempDir = tmpdir()
       
       // Save uploaded file
       const fileId = uuidv4()
-      const pdfPath = join(uploadsDir, `${fileId}.pdf`)
-      const excelPath = join(uploadsDir, `${fileId}.xlsx`)
+      const pdfPath = join(tempDir, `${fileId}.pdf`)
+      const excelPath = join(tempDir, `${fileId}.xlsx`)
       
       const buffer = Buffer.from(await file.arrayBuffer())
       await writeFile(pdfPath, buffer)

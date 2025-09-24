@@ -1,11 +1,17 @@
-import { initializeApp, getApps, cert } from 'firebase-admin/app'
+import { initializeApp, getApps, cert, ServiceAccount } from 'firebase-admin/app'
 import { getAuth } from 'firebase-admin/auth'
 import { getFirestore } from 'firebase-admin/firestore'
 
-const firebaseAdminConfig = {
+// Check if all required environment variables are present
+if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
+  console.error('Missing Firebase Admin environment variables')
+  throw new Error('Missing Firebase Admin environment variables')
+}
+
+const firebaseAdminConfig: ServiceAccount = {
   projectId: process.env.FIREBASE_PROJECT_ID,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+  privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
 }
 
 // Initialize Firebase Admin

@@ -1,14 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyIdToken, getUserByUid, updateUserCredits } from '@/lib/firebase-admin'
 import { PDFProcessor } from '@/lib/pdfProcessor'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import * as admin from 'firebase-admin'
-import { getFirestore } from 'firebase-admin/firestore'
+
+// Dynamic import to prevent build-time errors
+let verifyIdToken: any, getUserByUid: any, updateUserCredits: any, getFirestore: any
+
+async function initializeFirebaseAdmin() {
+  try {
+    const firebaseAdmin = await import('@/lib/firebase-admin')
+    const firebaseFirestore = await import('firebase-admin/firestore')
+    
+    verifyIdToken = firebaseAdmin.verifyIdToken
+    getUserByUid = firebaseAdmin.getUserByUid
+    updateUserCredits = firebaseAdmin.updateUserCredits
+    getFirestore = firebaseFirestore.getFirestore
+    
+    return true
+  } catch (error) {
+    console.error('Failed to initialize Firebase Admin:', error)
+    return false
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Initialize Firebase Admin dynamically
+    const firebaseInitialized = await initializeFirebaseAdmin()
+    
+    if (!firebaseInitialized) {
+      return NextResponse.json(
+        { error: 'Firebase Admin not available' },
+        { status: 503 }
+      )
+    }
+
     const idToken = request.headers.get('authorization')?.replace('Bearer ', '')
 
     if (!idToken) {

@@ -1,9 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyIdToken, getUserByUid } from '@/lib/firebase-admin'
-import { getFirestore } from 'firebase-admin/firestore'
+
+// Dynamic import to prevent build-time errors
+let verifyIdToken: any, getUserByUid: any, getFirestore: any
+
+async function initializeFirebaseAdmin() {
+  try {
+    const firebaseAdmin = await import('@/lib/firebase-admin')
+    const firebaseFirestore = await import('firebase-admin/firestore')
+    
+    verifyIdToken = firebaseAdmin.verifyIdToken
+    getUserByUid = firebaseAdmin.getUserByUid
+    getFirestore = firebaseFirestore.getFirestore
+    
+    return true
+  } catch (error) {
+    console.error('Failed to initialize Firebase Admin:', error)
+    return false
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
+    // Initialize Firebase Admin dynamically
+    const firebaseInitialized = await initializeFirebaseAdmin()
+    
+    if (!firebaseInitialized) {
+      return NextResponse.json(
+        { error: 'Firebase Admin not available' },
+        { status: 503 }
+      )
+    }
+
     const idToken = request.headers.get('authorization')?.replace('Bearer ', '')
 
     if (!idToken) {
@@ -39,7 +66,7 @@ export async function GET(request: NextRequest) {
 
     const snapshot = await query.get()
     
-    const conversions = snapshot.docs.map(doc => {
+    const conversions = snapshot.docs.map((doc: any) => {
       const data = doc.data()
       return {
         id: doc.id,

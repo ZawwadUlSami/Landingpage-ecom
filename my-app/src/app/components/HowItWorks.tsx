@@ -1,63 +1,86 @@
+import { Upload, FileText, Download, CheckCircle } from 'lucide-react'
+
 export default function HowItWorks() {
   const steps = [
     {
-      title: "First Create Your Project To Integrate with our AI",
-      points: [
-        "Enter your brand name in the project setup.",
-        "Enter your domain name for integration.",
-        "Add a description of your brand.",
-      ],
+      title: "Upload Your Bank Statement",
+      description: "Simply drag and drop your PDF bank statement or click to select from your device.",
+      icon: Upload,
       badge: "Step 1",
+      color: "blue",
     },
     {
-      title: "Add Your Keywords & Select your Social Medias",
-      points: [
-        "AI suggests relevant keywords for your brand.",
-        "Add your chosen keywords manually.",
-        "Select the social medias you want to track.",
-      ],
-      badge: "Step 2",
+      title: "AI Processing",
+      description: "Our advanced algorithms analyze and extract transaction data from your PDF with high accuracy.",
+      icon: FileText,
+      badge: "Step 2", 
+      color: "green",
     },
     {
-      title: "Browse Posts Found From Your Chosen Social Medias",
-      points: [
-        "View posts that match your keywords from chosen socials.",
-        "Use Advanced Settings to filter your post fetching further.",
-        "Use View Post to open and engage with the posts.",
-      ],
+      title: "Data Extraction",
+      description: "We identify dates, descriptions, amounts, and balances from thousands of different bank formats.",
+      icon: CheckCircle,
       badge: "Step 3",
+      color: "purple",
     },
     {
-      title: "Now We Write You AI Replies Mentioning Your Brand",
-      points: [
-        "Each AI-generated reply is tailored to specific posts.",
-        "Naturally includes your brand and key messages.",
-        "Use Custom Prompts to generate replies as per your needs.",
-      ],
+      title: "Download Excel File",
+      description: "Get your clean, organized Excel file with all transactions properly formatted and ready to use.",
+      icon: Download,
       badge: "Step 4",
+      color: "orange",
     },
   ];
 
+  const getColorClasses = (color: string) => {
+    const colors = {
+      blue: { bg: 'bg-blue-50', icon: 'text-blue-600', badge: 'text-blue-600' },
+      green: { bg: 'bg-green-50', icon: 'text-green-600', badge: 'text-green-600' },
+      purple: { bg: 'bg-purple-50', icon: 'text-purple-600', badge: 'text-purple-600' },
+      orange: { bg: 'bg-orange-50', icon: 'text-orange-600', badge: 'text-orange-600' },
+    };
+    return colors[color as keyof typeof colors] || colors.blue;
+  };
+
   return (
-    <section className="w-full max-w-6xl mx-auto py-16 px-6">
-      <div className="text-center mb-10">
-        <span className="inline-block rounded-full border border-black/10 dark:border-white/15 px-3 py-1 text-sm font-medium mb-3">
-          How It Works
-        </span>
-        <h2 className="text-2xl sm:text-4xl font-bold">Use BizReply to Generate Customers & Traffic</h2>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {steps.map((step) => (
-          <div key={step.title} className="rounded-2xl border border-black/10 dark:border-white/15 p-5">
-            <div className="text-xs font-medium text-black/60 dark:text-white/60 mb-2">{step.badge}</div>
-            <h3 className="font-semibold mb-3">{step.title}</h3>
-            <ul className="list-disc pl-5 text-sm space-y-1 text-black/80 dark:text-white/80">
-              {step.points.map((p) => (
-                <li key={p}>{p}</li>
-              ))}
-            </ul>
+    <section className="py-24 bg-gray-50">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-light tracking-tight text-gray-900 mb-6">
+            How it works
+          </h2>
+          <p className="text-xl font-light text-gray-700 max-w-3xl mx-auto leading-relaxed">
+            Our streamlined process makes converting bank statements quick and effortless. 
+            No technical knowledge required.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((step, index) => {
+            const colorClasses = getColorClasses(step.color);
+            return (
+              <div key={step.title} className="bg-white rounded-2xl p-8 shadow-lg text-center hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className={`inline-flex items-center justify-center w-16 h-16 ${colorClasses.bg} rounded-full mb-6`}>
+                  <step.icon className={`w-8 h-8 ${colorClasses.icon}`} />
+                </div>
+                <div className={`text-sm font-semibold ${colorClasses.badge} mb-3`}>{step.badge}</div>
+                <h3 className="font-semibold mb-4 text-xl text-gray-900">{step.title}</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+        
+        {/* Process Flow Connector */}
+        <div className="hidden lg:flex justify-center mt-12">
+          <div className="flex items-center space-x-4 text-gray-400">
+            <div className="w-8 h-px bg-gray-300"></div>
+            <div className="text-sm font-light">Simple • Fast • Accurate</div>
+            <div className="w-8 h-px bg-gray-300"></div>
           </div>
-        ))}
+        </div>
       </div>
     </section>
   );

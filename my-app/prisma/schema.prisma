@@ -1,0 +1,63 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./prisma/dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  credits   Int      @default(0)
+  plan      String   @default("ANONYMOUS")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  conversions Conversion[]
+  subscriptions Subscription[]
+  
+  @@map("users")
+}
+
+model Conversion {
+  id          String   @id @default(cuid())
+  userId      String
+  fileName    String
+  fileSize    Int
+  status      String   @default("PENDING")
+  originalPdf String   // File path
+  excelFile   String?  // File path to generated Excel
+  errorMessage String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("conversions")
+}
+
+model Subscription {
+  id          String   @id @default(cuid())
+  userId      String
+  plan        String
+  status      String   @default("ACTIVE")
+  startDate   DateTime @default(now())
+  endDate     DateTime?
+  credits     Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("subscriptions")
+}

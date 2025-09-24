@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
         ...data,
         createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
         updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
-      }
+      } as any
     }).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
     // Calculate statistics

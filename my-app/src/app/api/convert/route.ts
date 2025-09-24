@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PDFProcessor } from '@/lib/pdfProcessor'
+import { TextractPDFProcessor } from '@/lib/textractPdfProcessor'
 import { writeFile } from 'fs/promises'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -89,19 +89,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate file
-    const validation = PDFProcessor.validatePDF({
-      fieldname: 'file',
-      originalname: file.name,
-      encoding: '7bit',
-      mimetype: file.type,
-      size: file.size,
-      buffer: Buffer.from(await file.arrayBuffer()),
-    } as any)
-
-    if (!validation.valid) {
+    // Validate file (basic validation)
+    if (!file.type.includes('pdf')) {
       return NextResponse.json(
-        { error: validation.error },
+        { error: 'Only PDF files are supported' },
+        { status: 400 }
+      )
+    }
+
+    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+      return NextResponse.json(
+        { error: 'File size too large. Maximum size is 50MB.' },
         { status: 400 }
       )
     }
@@ -117,17 +115,17 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer())
     await writeFile(pdfPath, buffer)
 
-    // Process PDF
-    console.log('Starting PDF processing...')
+    // Process PDF with Textract
+    console.log('Starting Textract PDF processing...')
     const processingStartTime = Date.now()
-    const result = await PDFProcessor.processPDF(pdfPath, excelPath)
+    const processor = new TextractPDFProcessor()
+    const excelBuffer = await processor.processPDF(pdfPath, excelPath)
     const processingEndTime = Date.now()
     const processingTime = processingEndTime - processingStartTime
-    console.log('PDF processing result:', result)
+    console.log('Textract processing completed in', processingTime, 'ms')
 
-    if (result.success && result.excelBuffer) {
-      // Deduct credit from user
-      await updateUserCredits(user.id, user.credits - 1)
+    // Deduct credit from user
+    await updateUserCredits(user.id, user.credits - 1)
 
       // Store conversion history in Firestore
       const db = getFirestore()
@@ -138,7 +136,7 @@ export async function POST(request: NextRequest) {
         originalFileName: file.name,
         convertedFileName: file.name.replace('.pdf', '.xlsx'),
         status: 'completed',
-        transactionCount: result.transactions?.length || 0,
+        transactionCount: 0, // Will be updated when we add transaction counting
         processingTime: processingTime,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -153,19 +151,13 @@ export async function POST(request: NextRequest) {
         // Don't fail the conversion if history saving fails
       }
 
-      // Return Excel file directly from buffer
-      return new NextResponse(result.excelBuffer as BodyInit, {
-        headers: {
-          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          'Content-Disposition': `attachment; filename="${file.name.replace('.pdf', '.xlsx')}"`,
-        },
-      })
-    } else {
-      return NextResponse.json(
-        { error: result.error || 'Conversion failed' },
-        { status: 500 }
-      )
-    }
+    // Return Excel file directly from buffer
+    return new NextResponse(excelBuffer as BodyInit, {
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': `attachment; filename="${file.name.replace('.pdf', '.xlsx')}"`,
+      },
+    })
   } catch (error) {
     console.error('Conversion error:', error)
 

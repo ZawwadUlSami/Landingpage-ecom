@@ -27,6 +27,11 @@ Your application is now clean and ready for deployment to Vercel without warning
 Add these environment variables in your Vercel dashboard:
 
 ```bash
+# AWS Textract Configuration
+AWS_ACCESS_KEY_ID=your_aws_access_key_id
+AWS_SECRET_ACCESS_KEY=your_aws_secret_access_key
+AWS_REGION=us-east-1
+
 # Firebase Web App Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=AIzaSyB8tXjPm0dRPKolsJl3qRj7rKFVoBxvoy4
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=bank-statement-converter-d7155.firebaseapp.com

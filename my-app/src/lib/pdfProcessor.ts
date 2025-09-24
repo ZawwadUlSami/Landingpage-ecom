@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import fs from 'fs'
 import path from 'path'
 
@@ -1088,13 +1088,32 @@ export class PDFProcessor {
     return transactions
   }
   
-  private static createExcelFile(transactions: BankTransaction[], outputPath: string): Buffer {
-    const workbook = XLSX.utils.book_new()
+  private static async createExcelFile(transactions: BankTransaction[], outputPath: string): Promise<Buffer> {
+    const workbook = new ExcelJS.Workbook()
+    const worksheet = workbook.addWorksheet('Bank Statement')
     
-    // Create proper bank statement Excel format
-    const worksheetData = [
-      ['Date', 'Description', 'Debit', 'Credit', 'Balance', 'Transaction Type'],
-      ...transactions.map(t => [
+    // Add header row with styling
+    const headerRow = worksheet.addRow(['Date', 'Description', 'Debit', 'Credit', 'Balance', 'Transaction Type'])
+    headerRow.font = { bold: true }
+    headerRow.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    }
+    
+    // Set column widths
+    worksheet.columns = [
+      { width: 12 }, // Date
+      { width: 50 }, // Description
+      { width: 15 }, // Debit
+      { width: 15 }, // Credit
+      { width: 15 }, // Balance
+      { width: 15 }  // Type
+    ]
+    
+    // Add transaction data
+    transactions.forEach(t => {
+      const row = worksheet.addRow([
         t.date,
         t.description,
         t.amount < 0 ? Math.abs(t.amount) : '', // Debit column
@@ -1102,55 +1121,28 @@ export class PDFProcessor {
         t.balance,
         t.type
       ])
-    ]
-    
-    const worksheet = XLSX.utils.aoa_to_sheet(worksheetData)
-    
-    // Set proper column widths for bank statement
-    worksheet['!cols'] = [
-      { width: 12 }, // Date
-      { width: 50 }, // Description (wider for full transaction details)
-      { width: 15 }, // Debit
-      { width: 15 }, // Credit
-      { width: 15 }, // Balance
-      { width: 15 }  // Type
-    ]
-    
-    // Format numbers as currency
-    const range = XLSX.utils.decode_range(worksheet['!ref']!)
-    for (let row = 1; row <= range.e.r; row++) {
-      // Format Debit column (C)
-      const debitCell = worksheet[XLSX.utils.encode_cell({ r: row, c: 2 })]
-      if (debitCell && debitCell.v) {
-        debitCell.z = '$#,##0.00'
-      }
       
-      // Format Credit column (D)
-      const creditCell = worksheet[XLSX.utils.encode_cell({ r: row, c: 3 })]
-      if (creditCell && creditCell.v) {
-        creditCell.z = '$#,##0.00'
+      // Format currency columns
+      if (t.amount < 0) {
+        row.getCell(3).numFmt = '$#,##0.00' // Debit
       }
-      
-      // Format Balance column (E)
-      const balanceCell = worksheet[XLSX.utils.encode_cell({ r: row, c: 4 })]
-      if (balanceCell && balanceCell.v) {
-        balanceCell.z = '$#,##0.00'
+      if (t.amount >= 0) {
+        row.getCell(4).numFmt = '$#,##0.00' // Credit
       }
-    }
+      row.getCell(5).numFmt = '$#,##0.00' // Balance
+    })
     
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Bank Statement')
-    
-    // Generate Excel file in memory
-    const excelBuffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' })
+    // Generate Excel file buffer
+    const excelBuffer = await workbook.xlsx.writeBuffer()
     
     // Write to file for backup (optional)
     try {
-      fs.writeFileSync(outputPath, excelBuffer)
+      await workbook.xlsx.writeFile(outputPath)
     } catch (error) {
       console.log('Could not write to file, but buffer is ready:', error)
     }
     
-    return excelBuffer
+    return Buffer.from(excelBuffer)
   }
   
   static async processPDF(pdfPath: string, outputPath: string): Promise<ConversionResult> {
@@ -1273,7 +1265,7 @@ export class PDFProcessor {
           }
         })
         
-        const excelBuffer = this.createExcelFile(diagnosticTransactions, outputPath)
+        const excelBuffer = await this.createExcelFile(diagnosticTransactions, outputPath)
         
         return {
           success: true,
@@ -1283,7 +1275,7 @@ export class PDFProcessor {
       }
       
       // Create Excel file with extracted transactions
-      const excelBuffer = this.createExcelFile(transactions, outputPath)
+      const excelBuffer = await this.createExcelFile(transactions, outputPath)
       
       console.log('PDF processing completed successfully with', transactions.length, 'real transactions')
       

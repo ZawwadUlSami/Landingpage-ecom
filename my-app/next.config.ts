@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Fix workspace root warning
-  output: 'standalone',
-  outputFileTracingRoot: undefined,
+  // Fix workspace root warning by explicitly setting the root
+  outputFileTracingRoot: __dirname,
   
   // Optimize for production
   experimental: {

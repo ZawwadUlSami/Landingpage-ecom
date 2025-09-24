@@ -9,6 +9,25 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['lucide-react']
   },
 
+  // Configure headers for better Firebase Auth compatibility
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'unsafe-none'
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups'
+          }
+        ],
+      },
+    ]
+  },
+
   // Handle webpack config for Node.js modules
   webpack: (config, { isServer }) => {
     if (!isServer) {

@@ -1,4 +1,4 @@
-git export const metadata = {
+export const metadata = {
   title: "Features | BizReply",
   description: "Explore BizReply's core features that help you find, engage, and convert on social media using AI.",
 };

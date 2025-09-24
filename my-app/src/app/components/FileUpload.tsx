@@ -259,7 +259,7 @@ export default function FileUpload({ onConversionComplete }: FileUploadProps) {
         <div className="p-8 pt-0">
           <button
             onClick={handleConvert}
-            disabled={!uploadedFile || isUploading || (user?.credits ?? 0) <= 0}
+            disabled={!uploadedFile || isUploading || Boolean(user && (user?.credits ?? 0) <= 0)}
             className="group relative w-full bg-blue-600 text-white py-5 px-8 rounded-2xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all duration-200 shadow-lg hover:shadow-xl hover:bg-blue-700 transform hover:-translate-y-0.5 disabled:transform-none disabled:hover:scale-100"
           >
             {isUploading ? (

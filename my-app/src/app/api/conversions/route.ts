@@ -39,19 +39,22 @@ export async function GET(request: NextRequest) {
 
     const snapshot = await query.get()
     
-    const conversions = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() || doc.data().createdAt,
-      updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString() || doc.data().updatedAt,
-    })).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    const conversions = snapshot.docs.map(doc => {
+      const data = doc.data()
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || data.createdAt,
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString() || data.updatedAt,
+      }
+    }).sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
     // Calculate statistics
     const totalConversions = conversions.length
-    const successfulConversions = conversions.filter(c => c.status === 'completed').length
-    const totalTransactions = conversions.reduce((sum, c) => sum + (c.transactionCount || 0), 0)
+    const successfulConversions = conversions.filter((c: any) => c.status === 'completed').length
+    const totalTransactions = conversions.reduce((sum: number, c: any) => sum + (c.transactionCount || 0), 0)
     const averageProcessingTime = conversions.length > 0 
-      ? conversions.reduce((sum, c) => sum + (c.processingTime || 0), 0) / conversions.length / 1000
+      ? conversions.reduce((sum: number, c: any) => sum + (c.processingTime || 0), 0) / conversions.length / 1000
       : 0
 
     return NextResponse.json({

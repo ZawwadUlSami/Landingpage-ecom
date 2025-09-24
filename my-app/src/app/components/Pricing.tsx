@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAuthStore } from '@/lib/store'
+import { useAuth } from '@/contexts/AuthContext'
 import AuthModal from './AuthModal'
 
 interface Plan {
@@ -17,7 +17,7 @@ interface Plan {
 export default function Pricing() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [authMode, setAuthMode] = useState<'login' | 'register'>('register')
-  const { isAuthenticated } = useAuthStore()
+  const { user } = useAuth()
 
   const plans: Plan[] = [
     {
@@ -73,7 +73,7 @@ export default function Pricing() {
       const converter = document.querySelector('[data-testid="file-upload"]') || document.querySelector('section')
       converter?.scrollIntoView({ behavior: 'smooth' })
     } else if (planName === 'Starter') {
-      if (isAuthenticated) {
+      if (user) {
         window.location.href = '/dashboard'
       } else {
         setAuthMode('register')

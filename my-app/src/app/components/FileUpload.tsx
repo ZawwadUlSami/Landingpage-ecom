@@ -44,7 +44,7 @@ export default function FileUpload({ onConversionComplete }: FileUploadProps) {
     }
 
     // Check if user is logged in and has credits
-    if (user && user.credits <= 0) {
+    if (user && (user.credits ?? 0) <= 0) {
       toast.error('Insufficient credits. Please upgrade your plan.')
       return
     }
@@ -259,7 +259,7 @@ export default function FileUpload({ onConversionComplete }: FileUploadProps) {
         <div className="p-8 pt-0">
           <button
             onClick={handleConvert}
-            disabled={!uploadedFile || isUploading || (user && user.credits <= 0)}
+            disabled={!uploadedFile || isUploading || (user?.credits ?? 0) <= 0}
             className="group relative w-full bg-blue-600 text-white py-5 px-8 rounded-2xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 transition-all duration-200 shadow-lg hover:shadow-xl hover:bg-blue-700 transform hover:-translate-y-0.5 disabled:transform-none disabled:hover:scale-100"
           >
             {isUploading ? (
@@ -282,7 +282,7 @@ export default function FileUpload({ onConversionComplete }: FileUploadProps) {
         </div>
 
         {/* Warnings - Apple Style */}
-        {user && user.credits <= 0 && (
+        {user && (user.credits ?? 0) <= 0 && (
           <div className="mx-8 mb-8 p-6 bg-red-50 border border-red-200 rounded-2xl">
             <div className="flex items-start gap-4">
               <AlertCircle className="h-6 w-6 text-red-500 flex-shrink-0 mt-0.5" />

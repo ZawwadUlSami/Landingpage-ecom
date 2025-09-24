@@ -1308,7 +1308,7 @@ export class PDFProcessor {
     }
   }
   
-  static validatePDF(file: Express.Multer.File): { valid: boolean; error?: string } {
+  static validatePDF(file: { originalname?: string; mimetype: string; size: number; buffer: Buffer }): { valid: boolean; error?: string } {
     // Check if file exists
     if (!file) {
       return { valid: false, error: 'No file provided' }

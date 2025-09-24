@@ -1,0 +1,12 @@
+{
+  "functions": {
+    "src/app/api/convert/route.ts": {
+      "maxDuration": 30
+    },
+    "src/app/api/convert-anonymous/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "regions": ["iad1"],
+  "framework": "nextjs"
+}
